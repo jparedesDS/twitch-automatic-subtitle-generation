@@ -1,5 +1,9 @@
 # Real-Time Audio Translator 🎧🌐
 
+<p align="center">
+<img src="https://img.shields.io/badge/STATUS-IN%20DEVELOPMENT-green">
+</p>
+
 This project captures system audio in real-time, transcribes it into text using a speech recognition model (ASR), and translates it from English to Spanish using Hugging Face models.
 
 ## Features
