@@ -8,13 +8,6 @@ This project captures system audio in real-time, transcribes it into text using 
 - Transcription translation from English to Spanish using the `Helsinki-NLP/opus-mt-en-es model`.
 
 ## Requirements
-Python 3.8 or higher.
-FFmpeg installed and accessible via the FFMPEG_PATH environment variable.
-The following Python packages:
-pyaudio
-transformers
-pydub
-
 - Python 3.8 or higher.
 - [FFmpeg](https://ffmpeg.org/) installed and accessible via the `FFMPEG_PATH` environment variable.
 - The following Python packages:
@@ -23,14 +16,11 @@ pydub
   - `pydub`
 
 ## Installation
-
 1. Clone this repository:
    ```bash
    git clone https://github.com/tuusuario/audio-translator.git
    cd audio-translator
-
 2. Install the requirements:
-
 ```
 pip install -r requirements.txt
 ```
@@ -38,6 +28,7 @@ pip install -r requirements.txt
 ```
 set FFMPEG_PATH=C:/ruta/a/ffmpeg/bin/ffmpeg.exe
 ```
+
 ## Usage
 1. Run the main script:
 ```
