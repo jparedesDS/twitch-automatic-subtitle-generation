@@ -1,63 +1,69 @@
-# Audio Translator in Real-Time 🎧🌐
+# Real-Time Audio Translator 🎧🌐
 
-Este proyecto permite capturar audio del sistema en tiempo real, transcribirlo a texto utilizando un modelo de reconocimiento de voz (ASR) y traducirlo de inglés a español con ayuda de modelos de Hugging Face. 
+This project captures system audio in real-time, transcribes it into text using a speech recognition model (ASR), and translates it from English to Spanish using Hugging Face models.
 
-## Características
+## Features
+- Real-time audio capture from loopback devices (Stereo Mix or similar).
+- Audio-to-text transcription using the `openai/whisper-large-v2` model.
+- Transcription translation from English to Spanish using the `Helsinki-NLP/opus-mt-en-es model`.
 
-- Captura de audio en tiempo real desde dispositivos loopback (Stereo Mix o similares).
-- Transcripción de audio a texto utilizando el modelo `openai/whisper-large-v2`.
-- Traducción del texto transcrito de inglés a español con el modelo `Helsinki-NLP/opus-mt-en-es`.
+## Requirements
+Python 3.8 or higher.
+FFmpeg installed and accessible via the FFMPEG_PATH environment variable.
+The following Python packages:
+pyaudio
+transformers
+pydub
 
-## Requisitos
-
-- Python 3.8 o superior.
-- [FFmpeg](https://ffmpeg.org/) instalado y accesible en la variable de entorno `FFMPEG_PATH`.
-- Los siguientes paquetes de Python:
+- Python 3.8 or higher.
+- [FFmpeg](https://ffmpeg.org/) installed and accessible via the `FFMPEG_PATH` environment variable.
+- The following Python packages:
   - `pyaudio`
   - `transformers`
   - `pydub`
 
-## Instalación
+## Installation
 
-1. Clona este repositorio:
+1. Clone this repository:
    ```bash
    git clone https://github.com/tuusuario/audio-translator.git
    cd audio-translator
 
-2. Instala los requisitos:
+2. Install the requirements:
 
 ```
 pip install -r requirements.txt
 ```
-3. Asegúrate de que FFmpeg esté instalado y configurado correctamente. En Windows, agrega la ruta de FFmpeg a la variable de entorno FFMPEG_PATH:
+3. Ensure FFmpeg is installed and properly configured. On Windows, add the FFmpeg path to the FFMPEG_PATH environment variable:
 ```
 set FFMPEG_PATH=C:/ruta/a/ffmpeg/bin/ffmpeg.exe
 ```
-## Uso
-1. Ejecuta el script principal:
+## Usage
+1. Run the main script:
 ```
 python main.py
 ```
-2. El programa buscará dispositivos de audio compatibles (Stereo Mix o loopback) y comenzará a capturar el audio del sistema.
-3. Cada fragmento de audio (10 segundos) será transcrito y traducido. La salida se mostrará en la terminal.
-4. Para detener la grabación, usa Ctrl+C.
+2. The program will search for compatible audio devices (Stereo Mix or loopback) and begin capturing system audio.
+3. Each audio segment (10 seconds) will be transcribed and translated. The output will be displayed in the terminal.
+4. To stop the recording, use Ctrl+C.
 
-## Estructura del Código
-- Captura de Audio: Se utiliza la biblioteca pyaudio para leer datos de audio desde un dispositivo loopback.
-- Procesamiento de Audio: Se emplea pydub para convertir los datos binarios en un archivo de audio procesable.
-- Transcripción: Utiliza el modelo openai/whisper-large-v2 para convertir el audio a texto en inglés.
-- Traducción: Traduce el texto transcrito al español usando el modelo Helsinki-NLP/opus-mt-en-es.
-## Problemas Comunes
-1. Dispositivo de audio no encontrado:
-- `Asegúrate de habilitar el dispositivo loopback o Stereo Mix en la configuración de tu sistema.`
-2. Errores relacionados con FFmpeg:
-- `Verifica que FFmpeg esté instalado y que la ruta sea correcta.`
- 
-## Contribuciones
-¡Las contribuciones son bienvenidas! Si encuentras un error o tienes una idea para mejorar, abre un issue o envía un pull request.
+## Code Structure
+- Audio Capture: The pyaudio library is used to read audio data from a loopback device.
+- Audio Processing: The pydub library processes binary data into an audio file format.
+- Transcription: The `openai/whisper-large-v2` model converts audio to English text.
+- Translation: The transcribed text is translated to Spanish using the `Helsinki-NLP/opus-mt-en-es` model.
 
-## Licencia
-Este proyecto está licenciado bajo la MIT License.
+## Common Issues
+1. Audio device not found:
+- `Ensure the loopback or Stereo Mix device is enabled in your system settings.`
+2. FFmpeg-related errors:
+- `Verify that FFmpeg is installed and that the path is correctly configured.`
 
-## Créditos
-Creado con ❤️ y los modelos de Hugging Face.
+## Contributions
+Contributions are welcome! If you find a bug or have an idea for improvement, open an issue or submit a pull request.
+
+## License
+This project is licensed under the MIT License.
+
+## Credits
+Created with ❤️ and Hugging Face models.
