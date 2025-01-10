@@ -1,6 +1,5 @@
-<p align="center">
 # Real-Time Audio Translator 🎧🌐
-</p>
+
 <p align="center">
 <img src="https://img.shields.io/badge/STATUS-IN%20DEVELOPMENT-green">
 </p>
