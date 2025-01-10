@@ -1,5 +1,6 @@
+<p align="center">
 # Real-Time Audio Translator 🎧🌐
-
+</p>
 <p align="center">
 <img src="https://img.shields.io/badge/STATUS-IN%20DEVELOPMENT-green">
 </p>
@@ -30,7 +31,7 @@ pip install -r requirements.txt
 ```
 3. Ensure FFmpeg is installed and properly configured. On Windows, add the FFmpeg path to the FFMPEG_PATH environment variable:
 ```
-set FFMPEG_PATH=C:/ruta/a/ffmpeg/bin/ffmpeg.exe
+set FFMPEG_PATH=C:/ffmpeg/bin/ffmpeg.exe
 ```
 
 ## Usage
