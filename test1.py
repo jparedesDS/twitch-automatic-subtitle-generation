@@ -11,14 +11,14 @@ from queue import Queue
 FFMPEG_PATH = os.getenv("FFMPEG_PATH", r"C:/ffmpeg/bin/ffmpeg.exe")
 AudioSegment.converter = FFMPEG_PATH
 
-CHUNK = 1024
+CHUNK = 1024  # Tamaño de la captura de audio
 FORMAT = pyaudio.paInt16
-CHANNELS = 2  # Stereo
-RATE = 44100  # Frecuencia de muestreo común para audio de salida
+CHANNELS = 1  # Forzar audio mono
+RATE = 16000  # Reducción de la frecuencia de muestreo para mejorar rendimiento (16kHz es suficiente)
 
 # Inicializar modelos de Hugging Face
 print("Cargando modelos, por favor espera...")
-speech_to_text = pipeline("automatic-speech-recognition", model="openai/whisper-large-v2", framework="pt")
+speech_to_text = pipeline("automatic-speech-recognition", model="openai/whisper-small", framework="pt")
 translator = pipeline("translation", model="Helsinki-NLP/opus-mt-en-es")
 print("Modelos cargados correctamente.")
 
@@ -40,14 +40,11 @@ def get_loopback_device_index():
 
 def audiosegment_to_numpy(audio_segment):
     """Convierte un AudioSegment en un array de NumPy."""
-    # Convertir a mono (un solo canal) si es estéreo
-    if audio_segment.channels == 2:
-        audio_segment = audio_segment.set_channels(1)
     samples = np.array(audio_segment.get_array_of_samples())
     return samples
 
 def transcribe_and_translate(audio_array):
-    """Función que maneja la transcripción y traducción en paralelo."""
+    """Transcribe y traduce fragmentos de audio."""
     try:
         # Transcribir el audio a texto en inglés
         transcription = speech_to_text(audio_array)
@@ -60,25 +57,26 @@ def transcribe_and_translate(audio_array):
     except Exception as e:
         print(f"Error al procesar el fragmento: {e}")
 
+
 def process_audio(queue):
-    """Función que procesa el audio desde la cola y realiza transcripción y traducción."""
+    """Procesa fragmentos de audio desde la cola."""
     while True:
-        # Obtener datos de la cola
         audio_array = queue.get()
         if audio_array is None:  # Señal de detención
             break
         transcribe_and_translate(audio_array)
 
+
 def capture_and_translate():
-    """Captura el audio del sistema en tiempo real y lo traduce de inglés a español."""
+    """Captura audio y lo traduce en tiempo real."""
     p = pyaudio.PyAudio()
     stream = None
-    audio_queue = Queue()
+    audio_queue = Queue(maxsize=10)  # Limitar el tamaño de la cola
 
     try:
         device_index = get_loopback_device_index()
 
-        # Abrir el stream de audio desde el dispositivo loopback
+        # Abrir stream de audio
         stream = p.open(format=FORMAT,
                         channels=CHANNELS,
                         rate=RATE,
@@ -86,24 +84,20 @@ def capture_and_translate():
                         input_device_index=device_index,
                         frames_per_buffer=CHUNK)
 
-        print("Grabando audio del sistema en tiempo real... (Ctrl+C para detener)")
+        print("Grabando audio en tiempo real...")
         audio_buffer = []
-
-        # Iniciar un hilo de procesamiento de audio
         processing_thread = threading.Thread(target=process_audio, args=(audio_queue,))
         processing_thread.start()
 
         while True:
             try:
-                # Leer datos de audio en fragmentos
+                # Capturar datos de audio
                 data = stream.read(CHUNK, exception_on_overflow=False)
                 audio_buffer.append(data)
 
-                # Procesar cada 5 segundos de audio
-                if len(audio_buffer) * CHUNK >= RATE * 5:  # 5 segundos
-                    print("Procesando fragmento...")
-
-                    # Combinar fragmentos en un único archivo de audio
+                # Procesar cada 1 segundo de audio
+                if len(audio_buffer) * CHUNK >= RATE*3:
+                    # Combinar fragmentos y procesar
                     audio_data = b"".join(audio_buffer)
                     audio_buffer = []
 
@@ -114,17 +108,16 @@ def capture_and_translate():
                         channels=CHANNELS
                     )
 
-                    # Convertir a array de NumPy
-                    audio_array = audiosegment_to_numpy(audio_segment)
+                    audio_array = audiosegment_to_numpy(audio_segment).astype(np.float32) / 32768.0
 
-                    # Normalizar el array para que esté en el rango [-1, 1]
-                    audio_array = audio_array.astype(np.float32) / 32768.0
-
-                    # Colocar el fragmento de audio en la cola para su procesamiento
-                    audio_queue.put(audio_array)
+                    # Agregar a la cola para procesar
+                    if not audio_queue.full():
+                        audio_queue.put(audio_array)
+                    else:
+                        print("Cola llena, descartando fragmento.")
 
             except Exception as e:
-                print(f"Error al procesar el fragmento: {e}")
+                print(f"Error al capturar audio: {e}")
 
     except KeyboardInterrupt:
         print("\nGrabación detenida.")
@@ -136,7 +129,7 @@ def capture_and_translate():
             stream.close()
         p.terminate()
 
-        # Detener el hilo de procesamiento
+        # Detener el hilo
         audio_queue.put(None)
         processing_thread.join()
 
