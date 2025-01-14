@@ -3,6 +3,9 @@ import numpy as np
 import pyaudio
 from pydub import AudioSegment
 from transformers import pipeline
+import threading
+import time
+from queue import Queue
 
 # Configuración de FFmpeg
 FFMPEG_PATH = os.getenv("FFMPEG_PATH", r"C:/ffmpeg/bin/ffmpeg.exe")
@@ -31,7 +34,7 @@ def get_loopback_device_index():
     """Devuelve el índice de un dispositivo loopback configurado manualmente o seleccionado dinámicamente."""
     print("Lista de dispositivos disponibles:")
     list_audio_devices()
-    device_index = int(input("Selecciona el índice del dispositivo de entrada: "))
+    device_index = 0 #int(input("Selecciona el índice del dispositivo de entrada: "))
     print(f"Usando el dispositivo de entrada con índice {device_index}.")
     return device_index
 
@@ -43,10 +46,34 @@ def audiosegment_to_numpy(audio_segment):
     samples = np.array(audio_segment.get_array_of_samples())
     return samples
 
+def transcribe_and_translate(audio_array):
+    """Función que maneja la transcripción y traducción en paralelo."""
+    try:
+        # Transcribir el audio a texto en inglés
+        transcription = speech_to_text(audio_array)
+        english_text = transcription['text']
+        print(f"Texto en inglés: {english_text}")
+
+        # Traducir el texto al español
+        translated_text = translator(english_text)[0]['translation_text']
+        print(f"Traducción al español: {translated_text}\n")
+    except Exception as e:
+        print(f"Error al procesar el fragmento: {e}")
+
+def process_audio(queue):
+    """Función que procesa el audio desde la cola y realiza transcripción y traducción."""
+    while True:
+        # Obtener datos de la cola
+        audio_array = queue.get()
+        if audio_array is None:  # Señal de detención
+            break
+        transcribe_and_translate(audio_array)
+
 def capture_and_translate():
     """Captura el audio del sistema en tiempo real y lo traduce de inglés a español."""
     p = pyaudio.PyAudio()
     stream = None
+    audio_queue = Queue()
 
     try:
         device_index = get_loopback_device_index()
@@ -62,14 +89,18 @@ def capture_and_translate():
         print("Grabando audio del sistema en tiempo real... (Ctrl+C para detener)")
         audio_buffer = []
 
+        # Iniciar un hilo de procesamiento de audio
+        processing_thread = threading.Thread(target=process_audio, args=(audio_queue,))
+        processing_thread.start()
+
         while True:
             try:
                 # Leer datos de audio en fragmentos
                 data = stream.read(CHUNK, exception_on_overflow=False)
                 audio_buffer.append(data)
 
-                # Procesar cada 10 segundos de audio
-                if len(audio_buffer) * CHUNK >= RATE * 5:  # 10 segundos
+                # Procesar cada 5 segundos de audio
+                if len(audio_buffer) * CHUNK >= RATE * 5:  # 5 segundos
                     print("Procesando fragmento...")
 
                     # Combinar fragmentos en un único archivo de audio
@@ -89,14 +120,8 @@ def capture_and_translate():
                     # Normalizar el array para que esté en el rango [-1, 1]
                     audio_array = audio_array.astype(np.float32) / 32768.0
 
-                    # Transcribir el audio a texto en inglés
-                    transcription = speech_to_text(audio_array)
-                    english_text = transcription['text']
-                    print(f"Texto en inglés: {english_text}")
-
-                    # Traducir el texto al español
-                    translated_text = translator(english_text)[0]['translation_text']
-                    print(f"Traducción al español: {translated_text}\n")
+                    # Colocar el fragmento de audio en la cola para su procesamiento
+                    audio_queue.put(audio_array)
 
             except Exception as e:
                 print(f"Error al procesar el fragmento: {e}")
@@ -110,6 +135,10 @@ def capture_and_translate():
         if stream:
             stream.close()
         p.terminate()
+
+        # Detener el hilo de procesamiento
+        audio_queue.put(None)
+        processing_thread.join()
 
 if __name__ == "__main__":
     try:
