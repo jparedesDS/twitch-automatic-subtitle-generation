@@ -22,7 +22,7 @@ This project captures system audio in real-time, transcribes it into text using 
 ## Installation
 1. Clone this repository:
    ```bash
-   git clone https://github.com/jparedesDS/audio-translator.git
+   git clone https://github.com/jparedesDS/twitch-automatic-subtitle-generation
    cd audio-translator
 2. Install the requirements:
 ```
