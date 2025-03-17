@@ -8,6 +8,21 @@ from queue import Queue
 import tkinter as tk
 from tkinter import scrolledtext, ttk
 
+
+"""
+CHUNK	maxsize	Latencia	Precisión	Uso recomendado
+2048	20-30	🔥 Muy baja	🟡 Media	Respuesta ultrarrápida, pero puede perder contexto.
+4096	10-20	⚡ Baja	🟢 Buena	Rápida y con buena precisión, ideal para series en vivo.
+5024	5-15	⏳ Media	🟢 Muy buena	Buen equilibrio entre velocidad y contexto.
+8192	3-10	🐢 Alta	🟢🔵 Excelente	Traducción más precisa, pero con más retraso.
+--------------------------------------------------------------------------------------------
+maxsize	Latencia	Precisión	Uso recomendado
+5-10	⚡ Muy baja	🟡 Media	Para traducción rápida en tiempo real, con respuesta inmediata.
+10-20	⏳ Media	🟢 Buena	Equilibrio entre rapidez y precisión. Ideal para diálogos naturales.
+20-30	🐢 Alta	🟢🔵 Muy buena	Si la prioridad es la calidad en textos largos, pero con más retraso.
+"""
+
+
 CHUNK = 4096
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
