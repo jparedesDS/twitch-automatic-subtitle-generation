@@ -10,6 +10,18 @@ from tkinter import scrolledtext, ttk
 
 
 """
+8000 Hz (8 kHz)
+Más rápido y liviano, pero pierde calidad en la transcripción.
+Puede ser suficiente para conversaciones claras y sin ruido.
+
+16000 Hz (16 kHz) ✅ Recomendado
+Buen equilibrio entre calidad y rapidez.
+Whisper (el modelo que usas) funciona bien con esta tasa.
+
+22050 Hz o 44100 Hz
+Mayor calidad, pero más lento en procesamiento.
+Puede ser útil si el audio es complejo o hay mucho ruido.
+---------------------------------------------------------------------------------------------
 CHUNK	maxsize	Latencia	Precisión	Uso recomendado
 2048	20-30	🔥 Muy baja	🟡 Media	Respuesta ultrarrápida, pero puede perder contexto.
 4096	10-20	⚡ Baja	🟢 Buena	Rápida y con buena precisión, ideal para series en vivo.
